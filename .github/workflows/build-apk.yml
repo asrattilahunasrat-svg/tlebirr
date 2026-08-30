@@ -35,18 +35,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
-        continue-on-error: true
         run: ./gradlew assembleDebug --stacktrace --info
-
-      - name: Show Build Errors
-        if: always()
-        run: |
-          echo "========== BUILD ERROR SEARCH =========="
-          if [ -f build.log ]; then
-            cat build.log
-          fi
-          echo "========== GRADLE FAILURE SEARCH =========="
-          ./gradlew assembleDebug --stacktrace 2>&1 | grep -E "e: |error:|ERROR|FAILURE|Caused by:" | tail -100 || true
 
       - name: Upload APK
         if: success()
