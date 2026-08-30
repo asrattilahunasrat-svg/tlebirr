@@ -35,7 +35,19 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace --info
+        run: |
+          set +e
+          ./gradlew assembleDebug --stacktrace --console=plain 2>&1 | tee build-error.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          echo "GRADLE_EXIT_CODE=$BUILD_EXIT"
+          exit $BUILD_EXIT
+
+      - name: Upload Build Error Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TleBirr-error-log
+          path: build-error.log
 
       - name: Upload APK
         if: success()
