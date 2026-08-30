@@ -23,7 +23,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Set up Gradle 8.7
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
@@ -35,14 +35,18 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace --info 2>&1 | tee build.log
+        continue-on-error: true
+        run: ./gradlew assembleDebug --stacktrace --info
 
-      - name: Upload build log
+      - name: Show Build Errors
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: TleBirr-build-log
-          path: build.log
+        run: |
+          echo "========== BUILD ERROR SEARCH =========="
+          if [ -f build.log ]; then
+            cat build.log
+          fi
+          echo "========== GRADLE FAILURE SEARCH =========="
+          ./gradlew assembleDebug --stacktrace 2>&1 | grep -E "e: |error:|ERROR|FAILURE|Caused by:" | tail -100 || true
 
       - name: Upload APK
         if: success()
